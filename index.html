@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TODO_LIST</title>
+  <link rel="stylesheet" href="index.css">
+
+</head>
+<body>
+  <div id="app">
+    <h1 v-text="title"></h1>
+
+
+  
+    
+
+
+    <!-- 任务信息 -->
+    <div class="info">
+    <input class="new-item" v-model="newItem" v-on:keyup.enter="addNew" placeholder="No more than 28 characters">
+    <span class="input-ct">
+      <input type="checkbox" id="importance" v-model="checked">
+    <label for="importance">{{checked? "This is important !":"Is this important ?"}}</label>
+    </span>
+    
+    <p class="explain">{{explain}}</p>
+     
+     <!-- <label for="datepick">Deadline:</label>
+     <input type="text" id="datepick" @click="datePick"> -->
+   </div>
+
+
+   <!-- 操作 -->
+   <div class="ctrl">
+    <span class="add-new ctrl-btn" @click="addNew">Add To</span>
+    <span class="empty ctrl-btn" @click="showPanel">Empty All</span>
+  </div>
+
+
+  <div v-show="isEmpty" class="empty-list">No items have been created yet.</div>
+  <ul class="item-ct">
+    <li v-bind:class="[item.isFinished? 'finished':'unfinished']" v-for="item in items" @mouseover="showBtn(item)" @mouseleave="fideBtn(item)">
+      {{ item.lable }}
+      <span class="important" v-if="item.isImportant">Imp</span>
+      <span class="addtime">{{ item.addtime }}</span>
+      <span v-show="item.isShow" class="delete btn-middle" @click="deleteItem(item)">删除</span>
+      <span v-show="item.isShow" v-bind:class="[item.isFinished? 'finished-btn':'unfinished-btn','btn-finish','btn-middle']" @click="toggleFinished(item)">{{item.isFinished? '恢复':'完成'}}</span>
+      
+    </li>
+  </ul>
+  <div v-show="panelShow" class="delete-ct">
+    <div class="delete-panel">
+      <p>Are you sure to clear the list of items?</p>
+      <span class="ensure" @click="clear">Yes</span>
+      <span class="cancel" @click="cancel">No</span>
+    </div>
+  </div>
+</div>
+
+
+
+<script src="./vue.js"></script>
+<script src="./store.js"></script>
+<!-- <script src="./datepicker/jquery.js"></script>
+  <script src="./datepicker/datepicker.js"></script> -->
+  <script>
+    // new DatePicker($('#input'));
+    let getDate = function() {
+      let Today = new Date();
+      let year = Today.getFullYear();
+      let month = Today.getMonth() + 1;
+      let date = Today.getDate();
+      let day = Today.getDay();
+      let hour = Today.getHours();
+      let min = Today.getMinutes();
+      let weekArr = ['Sun.','Mon.','Tues.','Wed.','Thur.','Fri.','Sat.'];
+      let dateStr = month + '/' + date + ' ';
+      dateStr += hour + ':' + min + ' ';
+      dateStr += weekArr[day];
+      return dateStr;
+    }
+    let getLength = function(str) {
+      let alp= str.match(/\w/ig);
+      let char = str.match(/\W/ig);
+      let arr1 = alp? alp:[];
+      let arr2 = char? char:[];
+      let length = arr1.length + arr2.length*2;
+      return length;
+    }
+    new Vue ({
+      el: '#app',
+      data () {
+        return {
+          title: 'TO DO LIST',
+          explain: '',
+          newItem: '',
+          isEmpty: false,
+          checked: false,
+          isImportant: false,
+          panelShow: false,
+          items: []
+        }
+      },
+      created: function(){
+        this.items = fetch()
+        if(this.items.length === 0){
+          this.isEmpty = true;
+        }
+      },
+      watch: {
+        items: {
+          handler: function(items) {
+            save(items);
+            if(this.items.length === 0){
+              this.isEmpty = true;
+            } else {
+              this.isEmpty = false;
+            }
+          },
+          deep: true
+        }
+      },
+      methods: {
+        toggleFinished: function(item){
+          item.isFinished = !item.isFinished;
+        },
+        addNew: function(){
+          var length = getLength(this.newItem)
+          if(this.newItem === ''){
+            this.explain = 'You can not add an empty item.';
+            return;
+          }
+          if(length >27) {
+            this.explain = 'Each item list does NOT exceed 28 characters.';
+            return;
+          }
+          this.items.push({
+            lable: this.newItem, 
+            isFinished: false,
+            isShow: false,
+            addtime: getDate(),
+            isImportant: this.checked
+          });
+          this.explain = '';
+          this.newItem = '';
+          this.checked = false;
+        },
+        clear: function(){
+          this.items = [];
+          this.panelShow = false;
+        },
+        showBtn: function(item){
+          item.isShow = true;
+        },
+        fideBtn: function(item){
+          item.isShow = false;
+        },
+        deleteItem: function(item){
+          let index = this.items.indexOf(item);
+          this.items.splice(index, 1);
+        },
+        cancel: function(){
+          this.panelShow = false;
+        },
+        showPanel: function(){
+          if(this.items.length === 0){return;}
+          this.panelShow = true;
+        }
+      }
+
+
+    })
+  </script>
+</body>
+</html>
