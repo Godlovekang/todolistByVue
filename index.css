@@ -97,6 +97,7 @@
     height: 25px;
     line-height: 24px;
     box-sizing: border-box;
+    transition: .3s ease;
   }
   .item-ct>li>.addtime {
     float: right;
@@ -111,7 +112,7 @@
     background-color: #ccc;
   }
   .unfinished:hover {
-    border-bottom: 1px dashed #ccc;
+    border-bottom: 1px dashed #aaa;
   }
   .important {
     display: inline-block;
